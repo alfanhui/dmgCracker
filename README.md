@@ -2,12 +2,12 @@
 Brute-force dictionary program to crack dmg encrypted images.
 I wrote this program as the next available program was crowbarDMG.
 From a glance crowbar was: 
-  Single threaded
+  Single threaded.
   Tries to mount the drive at the same time.
   Runs about .8 passwords per second. (256bit encryption)
 dmgCracker is better because:
-  Multi-threaded, and allows for multiple dictionary files to be tested (increases chances of finding password)
-  Uses 'verify' and not 'attach' subprocess for faster password checking
+  Multi-threaded, and allows for multiple dictionary files to be tested (increases chances of finding password).
+  Uses 'verify' and not 'attach' subprocess for faster password checking.
   Runs about 55 passwords per second with 128bit encryption.
   Runs about 3.6 passwords per second with 256bit encryption.
 
