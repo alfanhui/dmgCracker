@@ -2,7 +2,14 @@ import subprocess
 import threading
 import argparse
 import sys
+'''
+run the program by:
+    python3 source.py image.dmg
+the program will use 4 threads to open and check
+passphrase0, passphrase1, passphrase2 and passphrase3 files for dictionary attack
 
+
+'''
 
 parser = argparse.ArgumentParser()
 parser.add_argument("dmg", help=".dmg to crack")
