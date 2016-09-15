@@ -1,7 +1,20 @@
 # dmgCracker
-Brute-force dictionary program to test out many different passwords as fast as possible. 
-Forced to write own program since crowbarDMG was very slow around 1.2seconds per password check. Single threaded and was also i believe trying to mount the drive at the same time. Using 'verify' and not 'attach' subprocess, i hope to do more passwords cycles and run multiple cycles per minute to increase chances of finding the password with a larger dictionary.
+Brute-force dictionary program to crack dmg encrypted images.
+I wrote this program as the next available program was crowbarDMG.
+From a glance crowbar was: 
+  Single threaded
+  Tries to mount the drive at the same time.
+  Runs about .8 passwords per second. (256bit encryption)
+dmgCracker is better because:
+  Multi-threaded, and allows for multiple dictionary files to be tested (increases chances of finding password)
+  Uses 'verify' and not 'attach' subprocess for faster password checking
+  Runs about 55 passwords per second with 128bit encryption.
+  Runs about 3.6 passwords per second with 256bit encryption.
 
 LEGAL NOTE: This program was created for the intention of cracking my own .dmg image which I had locked myself out of. I do not suggest using this program for illegal purposes such as opening .dmg images that you are not allowed access to and that you do not own yourself. 
 
 If you require a wordlist-generator, I also wrote a program to do this as well. 
+
+To run, you must have a encrypted dmg file in the same folder, and at least 1 passphrase file containing a dictionary. (a list of words)
+The number of threads you have must coorspond directly to the number of passphrase files you have. No more than 8 should be used on a quad-core cpu or else performance will be degraded.
+eg. Python3 source.py -t 8 image.dmg
