@@ -2,6 +2,7 @@ import subprocess
 import threading
 import argparse
 import sys
+import os
 '''
 run the program by:
     python3 source.py image.dmg
@@ -12,7 +13,8 @@ passphrase0, passphrase1, passphrase2 and passphrase3 files for dictionary attac
 '''
 
 parser = argparse.ArgumentParser()
-parser.add_argument("dmg", help=".dmg to crack")
+parser.add_argument("-t","--threads", help="thread count")
+parser.add_argument("-o", help=".dmg to crack")
 args = parser.parse_args()
 
 class myThread(threading.Thread):
@@ -45,10 +47,10 @@ class myThread(threading.Thread):
 count = 0
 t = []
 try:
-    while(count < 5)
-    newThread = myThread(count, 'passphrase' + str(count))
-    t.append(newThread)
-    count +=1
+    while(count < int(args.threads)):
+        newThread = myThread(count, 'passphrase' + str(count))
+        t.append(newThread)
+        count +=1
 except:
     print('Fuck, a thread unable to start')
     print(sys.exc_info()[0])
