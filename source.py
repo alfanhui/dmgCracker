@@ -14,7 +14,7 @@ passphrase0, passphrase1, passphrase2 and passphrase3 files for dictionary attac
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t","--threads", help="thread count")
-parser.add_argument("-o", help=".dmg to crack")
+parser.add_argument("dmg", help=".dmg to crack")
 args = parser.parse_args()
 
 class myThread(threading.Thread):
@@ -31,10 +31,9 @@ class myThread(threading.Thread):
         for line in self.f:
             self.passphrase = line.rstrip()
             try:
-                subprocess.call(['hdiutil', 'verify', '-passphrase', self.passphrase, args.dmg]
-                                                       ,stderr = open('results', 'w'))
-                statinfo = os.stat('results')
-                if statinfo.st_size is 118:
+                subprocess.call(['hdiutil', 'verify', '-passphrase', self.passphrase, args.dmg],stderr = open('results'+str(self.threadID), 'w'))
+                statinfo = os.stat('results'+str(self.threadID))
+                if statinfo.st_size != 206:
                     print('password found: ' + self.passphrase)
                     input('HOLD THE PHONE!')
                     break
