@@ -28,12 +28,15 @@ class myThread(threading.Thread):
         print('File opened.')
 
     def run(self):
+        subprocess.call(['hdiutil', 'verify', '-passphrase', "dmgCrackerPasswordCheck", args.dmg],stderr = open('results'+str(self.threadID), 'w'))
+        statinfo = os.stat('results'+str(self.threadID))
+        fileSize = statinfo.st_size
         for line in self.f:
             self.passphrase = line.rstrip()
             try:
                 subprocess.call(['hdiutil', 'verify', '-passphrase', self.passphrase, args.dmg],stderr = open('results'+str(self.threadID), 'w'))
                 statinfo = os.stat('results'+str(self.threadID))
-                if statinfo.st_size != 206:
+                if statinfo.st_size != fileSize:
                     print('password found: ' + self.passphrase)
                     input('HOLD THE PHONE!')
                     break
