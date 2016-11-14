@@ -5,9 +5,18 @@ import shlex
 import Queue
 import time
 from subprocess import Popen, PIPE
+from optparse import OptionParser
+
 queue = Queue.Queue()
 t = []
 found = False
+
+parser = OptionParser()
+parser.add_option("-u", "--update",
+                  action="store_false", dest="update", default=True,
+                  help="use to update program")
+(options, args) = parser.parse_args()
+
 class MyThread(threading.Thread):
     def __init__(self, queue):
         threading.Thread.__init__(self)
@@ -97,6 +106,12 @@ def main(success):
             with open('passphrase' + str(count), 'w') as modified: modified.write("FILECOMPLETED\n" + data)
 
 if __name__ == '__main__':
+    if not options.update:
+        print("Updating program...")
+        args = shlex.split("curl -o source.py https://raw.githubusercontent.com/alfanhui/dmgCracker/master/source.py")
+        proc = Popen(args, stdout=PIPE, stderr=PIPE)
+        print("program updated.")
+        os._exit(1)
     found = False
     start = time.time()
     main(False)
