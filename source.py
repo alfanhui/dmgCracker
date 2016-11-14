@@ -10,7 +10,6 @@ from optparse import OptionParser
 queue = Queue.Queue()
 t = []
 found = False
-
 parser = OptionParser()
 parser.add_option("-u", "--update",
                   action="store_false", dest="update", default=True,
@@ -28,6 +27,7 @@ class MyThread(threading.Thread):
             args = shlex.split("hdiutil verify PJM.dmg -passphrase " + passphrase)
             proc = Popen(args, stdout=PIPE, stderr=PIPE)
             out, err = proc.communicate()
+            self.queue.task_done()
             if "checksum" in err:
                 print('password found: ' + passphrase)
                 passwordSave = open("PASSWORD IN HERE.txt", "w")
@@ -38,12 +38,10 @@ class MyThread(threading.Thread):
                 return
             else:
                 print("Failed:" + passphrase)
-            self.queue.task_done()
-            time.sleep(0.0001)
+            time.sleep(0.01)
 
     def stop(self):
         self.stopped = True
-
 
 def main(success):
     if success:
@@ -84,6 +82,7 @@ def main(success):
                 f.close()
                 for myThread in t:
                     myThread.start()
+                    time.sleep(.001)
                 while True:
                     time.sleep(.001)
                     if found == True:
@@ -112,11 +111,16 @@ if __name__ == '__main__':
         proc = Popen(args, stdout=PIPE, stderr=PIPE)
         print("program updated.")
         os._exit(1)
+    if os.path.isfile("PASSWORD IN HERE.txt"):
+        print("Did you know the password may have been found?")
+        raw_input("please check your folder!")
+        print("if it is a mistake, please remove it..")
+        os._exit(1)
     found = False
     start = time.time()
     main(False)
     end = time.time()
-    print("Time taken to complete: ", end - start)
+    print("Time taken to complete: ", end - start , " seconds..")
     os._exit(1)
 
 
