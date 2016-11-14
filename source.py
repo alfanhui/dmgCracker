@@ -1,79 +1,108 @@
-import subprocess
 import threading
-import argparse
 import sys
 import os
-'''
-run the program by:
-    python3 source.py image.dmg
-the program will use 4 threads to open and check
-passphrase0, passphrase1, passphrase2 and passphrase3 files for dictionary attack
-
-
-'''
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-t","--threads", help="thread count")
-parser.add_argument("dmg", help=".dmg to crack")
-args = parser.parse_args()
-
-class myThread(threading.Thread):
-    def __init__(self, threadID, phraseFile):
+import shlex
+import Queue
+import time
+from subprocess import Popen, PIPE
+queue = Queue.Queue()
+t = []
+found = False
+class MyThread(threading.Thread):
+    def __init__(self, queue):
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.phraseFile = phraseFile
-        #open file
-        print('opening ' + self.phraseFile + ' ...')
-        self.f = open(self.phraseFile, 'r')
-        print('File opened.')
+        self.queue = queue
 
     def run(self):
-        subprocess.call(['hdiutil', 'verify', '-passphrase', "dmgCrackerPasswordCheck", args.dmg],stderr = open('results'+str(self.threadID), 'w'))
-        statinfo = os.stat('results'+str(self.threadID))
-        fileSize = statinfo.st_size
-        for line in self.f:
-            self.passphrase = line.rstrip()
-            try:
-                subprocess.call(['hdiutil', 'verify', '-passphrase', self.passphrase, args.dmg],stderr = open('results'+str(self.threadID), 'w'))
-                statinfo = os.stat('results'+str(self.threadID))
-                if statinfo.st_size != fileSize:
-                    print('password found: ' + self.passphrase)
-                    input('HOLD THE PHONE!')
+        while not self.queue.empty():
+            passphrase = str(self.queue.get())
+            args = shlex.split("hdiutil verify PJM.dmg -passphrase " + passphrase)
+            proc = Popen(args, stdout=PIPE, stderr=PIPE)
+            out, err = proc.communicate()
+            if "checksum" in err:
+                print('password found: ' + passphrase)
+                passwordSave = open("PASSWORD IN HERE.txt", "w")
+                passwordSave.write(passphrase)
+                passwordSave.close()
+                global found
+                found = True
+                return
+            else:
+                print("Failed:" + passphrase)
+            self.queue.task_done()
+            time.sleep(0.0001)
+
+    def stop(self):
+        self.stopped = True
+
+
+def main(success):
+    if success:
+        print("closing threads... ")
+        for thread in t:
+            if thread.isAlive():
+                thread.stop()
+        print("Exiting Program.")
+        return
+    else:
+        count = 348
+        fileCheck = False
+        for i in range(count):
+            if os.path.isfile('passphrase' + str(i)):
+                f = open("passphrase" + str(i))
+                for line in f:
+                    check = line.rstrip()
+                    if "FILECOMPLETED" in check:
+                        fileCheck = True
+                        break
+                    else:
+                        count = i
+                        break
+                if fileCheck:
+                    fileCheck = False
+                    continue
+                else:
                     break
-                print('Failed:' + str(self.threadID) + ' ' + self.passphrase)
+        if(count !=349):
+            try:
+                for i in range(5):
+                    myThread = MyThread(queue)
+                    myThread.setDaemon(True)
+                    t.append(myThread)
+                f = open("passphrase" + str(count), 'r')
+                for line in f:
+                    queue.put(line.rstrip())
+                f.close()
+                for myThread in t:
+                    myThread.start()
+                while True:
+                    time.sleep(.001)
+                    if found == True:
+                        raise KeyboardInterrupt
+                queue.join()
+            except KeyboardInterrupt:
+                print("closing threads... ")
+                for thread in t:
+                    if thread.isAlive():
+                        thread.stop()
+                print("Exiting Program.")
+                return
             except:
-                print('Password check error:')
+                print("Fuck, a thread unable to start")
                 print(sys.exc_info()[0])
-        self.f.close()
+        else:
+            print("No more files available.")
+        if(queue.empty()):
+            with open("passphrase" + str(count), 'r') as original: data = original.read()
+            with open('passphrase' + str(count), 'w') as modified: modified.write("FILECOMPLETED\n" + data)
 
-count = 0
-t = []
-try:
-    while(count < int(args.threads)):
-        newThread = myThread(count, 'passphrase' + str(count))
-        t.append(newThread)
-        count +=1
-except:
-    print('Fuck, a thread unable to start')
-    print(sys.exc_info()[0])
-
-for thread in t:
-    thread.start()
-for thread in t:
-    thread.join()
-print("Exiting program")
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    found = False
+    start = time.time()
+    main(False)
+    end = time.time()
+    print("Time taken to complete: ", end - start)
+    os._exit(1)
 
 
 
