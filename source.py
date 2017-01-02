@@ -5,7 +5,6 @@ import os
 import shlex
 import Queue
 import time 
-from time import strftime
 from subprocess import Popen, PIPE
 from optparse import OptionParser
 
@@ -27,11 +26,11 @@ parser.add_option("-u", "--update",
 #Main Thread
 class MyThread(threading.Thread):
     def __init__(self, queue, printQueue):
-        thread = threading.Thread(target=self.run,args=())
+        threading.Thread.__init__(self)
         self.queue = queue
 	self.printQueue = printQueue
-	thread.daemon = True
-	thread.start()
+	#thread.daemon = True
+	#thread.start()
     
     def run(self):
         while not self.queue.empty():
@@ -58,11 +57,11 @@ class MyThread(threading.Thread):
 #Time remaining thread
 class timerThread(threading.Thread):
     def __init__(self,queue,printQueue):
-        thread = threading.Thread(target=self.run,args=())
+        threading.Thread.__init__(self)
         self.queue = queue
 	self.printQueue = printQueue
-	thread.daemon = True
-	thread.start()
+	#thread.daemon = True
+	#thread.start()
     
     def run(self):
 	global timeRemaining
@@ -71,7 +70,7 @@ class timerThread(threading.Thread):
 	    start = queue.qsize()
 	    time.sleep(1)
 	    end = queue.qsize()
-	    timeRemaining = (end / (start - end)) / 60
+	    timeRemaining = (end / (start - end)) / 60 + 1
 	    time.sleep(10)
 
     def stop(self):
@@ -85,15 +84,18 @@ def main():
 	    t.append(thread)
 	thread = timerThread(queue,printQueue)
 	t.append(thread)
-	print("Minutes\tQueue\tStatus\tPassphrase")	
+	for thread in t:
+	    thread.setDaemon(True)
+	    thread.start()
+	print("Minutes Remaining\tQueue\tStatus\tPassphrase")	
 	while not queue.empty():
-	    sys.stdout.write("\r                                                     ")
-	    sys.stdout.write("\r" + str(timeRemaining) + "\t"+ printQueue.get())
+	    sys.stdout.write("\r                                                                     ")
+	    sys.stdout.write("\r"+str(timeRemaining) + "\t\t\t"+ printQueue.get())
 	    sys.stdout.flush()
 	    if found == True:
 		raise KeyboardInterrupt
     except KeyboardInterrupt:
-	print("closing threads... ")
+	print("\nclosing threads... ")
 	for thread in t:
 	    if thread.isAlive():
 		thread.stop()
@@ -109,6 +111,7 @@ def main():
 
 def load_file_into_queue():
     nextFile = False
+    global fileCount
     while os.path.isfile('passphrase' + str(fileCount)):
 	f = open("passphrase" + str(fileCount), 'r')
 	for line in f:
@@ -120,7 +123,7 @@ def load_file_into_queue():
 		break
 	f.close()
 	if nextFile == True:
-	    i +=1
+	    fileCount +=1
 	    nextFile = False
 	else:
 	    return
