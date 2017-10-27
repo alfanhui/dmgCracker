@@ -1,3 +1,23 @@
+# There is a FASTER method:
+
+Download http://www.openwall.com/john/ (John the ripper)
+
+Locate /run folder in the john folder (you may have to compile)
+
+Locate /run/dmg2john
+
+$./dmg2john your_file.dmg >> output
+
+$./john output
+
+or
+
+$./john --format=dmg-opencl output
+
+note: this will use john's standard wordlist tries, please read john's documentation to use your own wordlists or password rules. I found that with my laptop I can get 15 tries p/s. 
+
+
+
 # dmgCracker
 Brute-force dictionary program to crack dmg encrypted images.
 I wrote this program as the next available program was crowbarDMG.
@@ -16,5 +36,3 @@ LEGAL NOTE: This program was created for the intention of cracking my own .dmg i
 If you require a wordlist-generator, I also wrote a program to do this as well. 
 
 To run, you must have a encrypted dmg file in the same folder, and at least 1 passphrase file containing a dictionary. (a list of words)
-The number of threads you have must coorspond directly to the number of passphrase files you have. No more than 8 should be used on a quad-core cpu or else performance will be degraded.
-eg. Python3 source.py -t 8 image.dmg
