@@ -2,17 +2,17 @@
 
 Download http://www.openwall.com/john/ (John the ripper)
 
-Locate /run folder (you may have to compile)
+Locate /run folder in the john folder (you may have to compile)
 
 Locate /run/dmg2john
 
 $./dmg2john your_file.dmg >> output
 
-./john output
+$./john output
 
 or
 
-./john --format=dmg-opencl output
+$./john --format=dmg-opencl output
 
 note: this will use john's standard wordlist tries, please read john's documentation to use your own wordlists or password rules. I found that with my laptop I can get 15 tries p/s. 
 
