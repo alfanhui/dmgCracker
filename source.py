@@ -3,7 +3,7 @@ import threading
 import sys
 import os
 import shlex
-import queue
+import Queue
 import time
 from subprocess import Popen, PIPE
 from optparse import OptionParser
